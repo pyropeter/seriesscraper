@@ -1,4 +1,4 @@
-import mechanize, string
+import mechanize, string, re
 
 def get_portals(url):
 	br = mechanize.Browser(factory=mechanize.RobustFactory())
@@ -10,8 +10,12 @@ def get_portals(url):
 	br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
 
 	# directly move to portal list
-	page = br.open(url + "watch-online")
+	page = br.open(url + "/watch-online")
 
+	# get name
+	name = re.search(r"&rarr; ([^<]+)<", br.response().read()).group(1).strip()
+
+	# get portals
 	portals = []
 	for link in br.links():
 		t = link.text
@@ -20,4 +24,6 @@ def get_portals(url):
 			if u:
 				portals.append(u)
 
-	return portals
+	return name, portals
+
+print get_portals("http://www.btvguide.com/The-Walking-Dead/Season-1/episode-3")
