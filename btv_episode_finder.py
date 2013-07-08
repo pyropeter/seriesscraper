@@ -36,5 +36,3 @@ def get_episodes(url):
 			pass
 
 	return hups2episodes(hups, url)
-
-print get_episodes("http://www.btvguide.com/The-Walking-Dead/")
