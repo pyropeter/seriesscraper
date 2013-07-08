@@ -1,16 +1,18 @@
 import mechanize, string, re
 
 def hups2episodes(hups, base_url):
-	episodes = []
+	seasons = {}
 	for hup in hups:
 		m = re.match(r"(.*) \(([\d]+)\)", hup)
 		name = m.group(1).replace(" ", "-")
 		num = int(m.group(2))
 
+		episodes = []
 		for i in range(1, num + 1):
 			url = base_url + name + "/" + "episode-" + str(i)
 			episodes.append(url)
-	return episodes
+		seasons[name] = episodes
+	return seasons
 
 def get_episodes(url):
 	br = mechanize.Browser(factory=mechanize.RobustFactory())
@@ -24,8 +26,6 @@ def get_episodes(url):
 	# directly move to episode list
 	page = br.open(url + "watch-online")
 
-	
-
 	hups = []
 	for link in br.links():
 		attrs = {a:b for a,b in link.attrs}
@@ -36,3 +36,4 @@ def get_episodes(url):
 			pass
 
 	return hups2episodes(hups, url)
+
