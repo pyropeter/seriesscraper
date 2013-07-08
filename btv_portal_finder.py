@@ -25,5 +25,3 @@ def get_portals(url):
 				portals.append(u)
 
 	return name, portals
-
-print get_portals("http://www.btvguide.com/The-Walking-Dead/Season-1/episode-3")
