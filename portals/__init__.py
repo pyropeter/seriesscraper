@@ -14,6 +14,9 @@ def scrape(url):
 
 	return format: (items, containsLists, containsAlternatives, orderMatters)
 	items: The items (streams or playlist-thingies) from the portal page
+			each item is a tuple: (title, url)
+			where title is an informational title for the url (should be an
+			human-readable string)
 	containsLists: Wether the items are streams or playlist-thingies
 	containsAlternatives: If True, every item is a playlist of streams
 			containing the same contents.
