@@ -23,7 +23,6 @@ def hups2episodes(hups, base_url):
 			attrs = {a:b for a,b in link.attrs}
 			try:
 				if attrs["class"] == "title":
-					url = attrs["href"]
 					episodes.append((link.text, attrs["href"]))
 			except KeyError:
 				pass
