@@ -2,17 +2,17 @@ import os
 import importlib
 from foo import NotMyDepartmentException
 
-portals = []
+hosters = []
 
 for module in os.listdir(os.path.dirname(__file__)):
 	if module == '__init__.py' or module[-3:] != '.py':
 		continue
-	portals.append(importlib.import_module("portals.%s" % module[:-3]))
+	hosters.append(importlib.import_module("hosters.%s" % module[:-3]))
 
-def scrape(url):
-	for portal in portals:
+def stream(url):
+	for hoster in hosters:
 		try:
-			return portal.scrape(url)
+			return hoster.stream(url)
 		except NotMyDepartmentException:
 			pass
 

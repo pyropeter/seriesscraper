@@ -5,7 +5,7 @@ import sys
 from btv_episode_finder import get_episodes
 from btv_portal_finder import get_portals
 from btv_splash_skipper import get_next_page
-import portals
+import hosters
 
 def filenameEscape(name):
 	return re.sub(r"[ /\0]", "_", name)
@@ -14,7 +14,7 @@ def getStream(urls):
 	for url in urls:
 		url = get_next_page(url)
 		print("Trying: %s" % url)
-		stream = portals.scrape(url)
+		stream = hosters.stream(url)
 		if stream != None:
 			return stream
 

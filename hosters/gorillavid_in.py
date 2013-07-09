@@ -3,7 +3,7 @@ import re
 import urllib
 import mechanize
 
-def scrape(url):
+def stream(url):
 	if not re.match(r"http://gorillavid.in/[a-z0-9]+", url):
 		raise NotMyDepartmentException()
 
