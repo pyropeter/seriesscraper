@@ -25,7 +25,7 @@ def scrape(url):
 	"""
 	for portal in portals:
 		try:
-			return portal.stream(url)
+			return portal.scrape(url)
 		except NotMyDepartmentException:
 			pass
 
