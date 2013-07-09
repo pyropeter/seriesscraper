@@ -11,7 +11,7 @@ def hups2episodes(hups, base_url):
 		for i in range(1, num + 1):
 			url = base_url + name + "/" + "episode-" + str(i)
 			episodes.append(url)
-		seasons[name] = episodes
+		seasons[m.group(1)] = episodes
 	return seasons
 
 def get_episodes(url):
