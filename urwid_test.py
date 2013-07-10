@@ -55,7 +55,6 @@ class ExampleParentNode(ParentNode):
 		if 'children' in childdata:
 			childclass = ExampleParentNode
 		else:
-			# has no children
 			childclass = ExampleNode
 		return childclass(childdata, parent=self, key=key, depth=childdepth)
 
@@ -133,7 +132,11 @@ def get_tree(obj):
 
 
 import handlers
-drwho = handlers.wrap("http://www.btvguide.com/Doctor-Who")
+import sys
+if len(sys.argv) > 1:
+	drwho = handlers.wrap("http://www.btvguide.com/%s" % " ".join(sys.argv[1:]).replace(" ", "-"))
+else:
+	drwho = handlers.wrap("http://www.btvguide.com/Doctor-Who")
 
 
 def starts_expanded(val):
