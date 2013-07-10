@@ -43,6 +43,16 @@ class ExampleParentNode(ParentNode):
 		childdata = self.get_value()['children'][key]
 		childdepth = self.get_depth() + 1
 		if 'children' in childdata:
+			# has children
+			if len(childdata["children"]) == 0:
+				# must still load children
+				print >>open("debug.log", "w"), childdata
+				for item in childdata["obj-data"]:
+					con = {"name": item.title(), "obj-data": item}
+					if(hasattr(item, "__getitem__")):
+						# contains iterable content
+						con["children"] = []
+					childdata["children"].append(con)
 			childclass = ExampleParentNode
 		else:
 			childclass = ExampleNode
@@ -101,20 +111,14 @@ class ExampleTreeBrowser:
 
 
 def get_tree(obj):
-	res = {"name": obj.title(), "children": []}
-#	for season in series:
-#		res["children"].append({"name": season.title()})
-#		res["children"][-1]["children"] = []
-#		for episode in season:
-#			res["children"][-1]["children"].append({"name": episode.title()})
+	res = {"name": obj.title(), "obj-data": obj}
 	if hasattr(obj, "__getitem__"):
 		res["children"] = []
 		for item in obj:
-			con = {"name": item.title()}
+			con = {"name": item.title(), "obj-data": item}
 			if(hasattr(item, "__getitem__")):
 				con["children"] = []
 			res["children"].append(con)
-		
 	return res
 
 
@@ -123,6 +127,7 @@ drwho = handlers.wrap("http://www.btvguide.com/Doctor-Who")
 
 
 def starts_expanded(val):
+	return False
 	if val == drwho.title():
 		return True
 	return False
