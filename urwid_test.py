@@ -80,13 +80,19 @@ class ExampleTreeBrowser:
 			('key', "Have fun")
 		]
 
-	def __init__(self, data=None):
+	def __init__(self, data=None, title=None):
 		self.topnode = ExampleParentNode(data)
 		self.listbox = TreeListBox(TreeWalker(self.topnode))
 		self.listbox.offset_rows = 1
-		self.header = urwid.Text( "" )
-		self.footer = urwid.AttrWrap( urwid.Text( self.footer_text ),
-			'foot')
+
+		self.header_text = [
+			('title', "Series:"), "    ",
+			('key', title)
+		]
+
+		self.header = urwid.AttrWrap( urwid.Text( self.header_text ), 'head')
+		self.footer = urwid.AttrWrap( urwid.Text( self.footer_text ), 'foot')
+
 		self.view = urwid.Frame( 
 			urwid.AttrWrap( self.listbox, 'body' ), 
 			header=urwid.AttrWrap(self.header, 'head' ), 
@@ -110,7 +116,10 @@ class ExampleTreeBrowser:
 			raise urwid.ExitMainLoop()
 
 
+head_title = ""
 def get_tree(obj):
+	global head_title 
+	head_title = obj.title()
 	res = {"name": obj.title(), "obj-data": obj}
 	if hasattr(obj, "__getitem__"):
 		res["children"] = []
@@ -127,10 +136,10 @@ drwho = handlers.wrap("http://www.btvguide.com/Doctor-Who")
 
 
 def starts_expanded(val):
-	if val == drwho.title():
+	if val == head_title:
 		return True
 	return False
 
 
 sample = get_tree(drwho)
-ExampleTreeBrowser(sample).main()
+ExampleTreeBrowser(sample, title=head_title).main()
