@@ -16,3 +16,12 @@ def wrap(url):
 		except NotMyDepartmentException:
 			pass
 
+	return UnknownThingie(url)
+
+class UnknownThingie(object):
+	def __init__(self, url):
+		self._url = url
+
+	def title(self):
+		return u"Unknown URL: %s" % self._url
+
