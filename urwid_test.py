@@ -39,7 +39,7 @@ class ExampleParentNode(ParentNode):
 
 		if len(data['children']) == 0:
 			# must still load children for this node
-			for item in self.get_value()['obj-data']:
+			for item in data['obj-data']:
 				con = {"name": item.title(), "obj-data": item}
 				if(hasattr(item, "__getitem__")):
 					# contains iterable content
