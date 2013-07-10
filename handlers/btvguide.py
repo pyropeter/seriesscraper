@@ -1,4 +1,4 @@
-from foo import NotMyDepartmentException
+from foo import NotMyDepartmentException, Thingie, ThingieWithItems
 import re
 from bs4 import BeautifulSoup
 import urllib
@@ -10,30 +10,6 @@ def wrap(url):
 		return Episode(url)
 
 	raise NotMyDepartmentException
-
-class Thingie(object):
-	def __init__(self, url, title=None):
-		self._url = url
-		self._fetched = False
-		self._title = title
-
-	def title(self):
-		if self._title == None:
-			self.fetch()
-		return self._title
-
-class ThingieWithItems(Thingie):
-	def __len__(self):
-		self.fetch()
-		return self._items.__len__()
-
-	def __getitem__(self, key):
-		self.fetch()
-		return self._items.__getitem__(key)
-
-	def __iter__(self):
-		self.fetch()
-		return self._items.__iter__()
 
 class Series(ThingieWithItems):
 	def fetch(self):
