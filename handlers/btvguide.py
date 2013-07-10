@@ -79,6 +79,15 @@ class Episode(ThingieWithItems):
 			url = link.attrs['href'].encode('ascii')
 			self._items.append(StreamWrapper(url, name))
 
+	def stream(self):
+		self.fetch()
+
+		for stream in self._items:
+			if hasattr(stream, 'stream'):
+				return stream.stream()
+
+		raise Exception("No useable stream found")
+
 class StreamWrapper(object):
 	def __init__(self, url, title):
 		self.__url = url
