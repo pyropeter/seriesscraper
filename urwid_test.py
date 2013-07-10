@@ -36,6 +36,16 @@ class ExampleParentNode(ParentNode):
 
 	def load_child_keys(self):
 		data = self.get_value()
+
+		if len(data['children']) == 0:
+			# must still load children for this node
+			for item in self.get_value()['obj-data']:
+				con = {"name": item.title(), "obj-data": item}
+				if(hasattr(item, "__getitem__")):
+					# contains iterable content
+					con["children"] = []
+				data['children'].append(con)
+
 		return range(len(data['children']))
 
 	def load_child_node(self, key):
@@ -43,18 +53,9 @@ class ExampleParentNode(ParentNode):
 		childdata = self.get_value()['children'][key]
 		childdepth = self.get_depth() + 1
 		if 'children' in childdata:
-			# has children
-			if len(childdata["children"]) == 0:
-				# must still load children
-				print >>open("debug.log", "w"), childdata
-				for item in childdata["obj-data"]:
-					con = {"name": item.title(), "obj-data": item}
-					if(hasattr(item, "__getitem__")):
-						# contains iterable content
-						con["children"] = []
-					childdata["children"].append(con)
 			childclass = ExampleParentNode
 		else:
+			# has no children
 			childclass = ExampleNode
 		return childclass(childdata, parent=self, key=key, depth=childdepth)
 
