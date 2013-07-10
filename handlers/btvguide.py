@@ -1,7 +1,8 @@
-from foo import NotMyDepartmentException, Thingie, ThingieWithItems
+from foo import NotMyDepartmentException, Thingie, ThingieWithItems, newBrowser
 import re
 from bs4 import BeautifulSoup
 import urllib
+import handlers
 
 def wrap(url):
 	if re.match(r"http://www.btvguide.com/[^/]+", url):
@@ -65,6 +66,36 @@ class Episode(ThingieWithItems):
 			return
 		self._fetched = True
 
-		raise Exception("Not implemented")
+		soup = BeautifulSoup(urllib.urlopen("%s/watch-online" % (self._url)))
+
+		self._title = soup.find_all('p',
+				text=lambda x: False if x == None else x.startswith(u'\u2192'))[0].text[5:].strip()
+
+		self._items = []
+		for link in soup.find_all('a', class_='clickfreehoney'):
+			if not u'Free Honey' in link.text:
+				continue
+			name = re.sub(ur'[^\w.]+', ' ', link.text.strip())
+			url = link.attrs['href'].encode('ascii')
+			self._items.append(StreamWrapper(url, name))
+
+class StreamWrapper(object):
+	def __init__(self, url, title):
+		self.__url = url
+		self.__title = title
+		self.__wrappee = None
+
+	def title(self):
+		return self.__wrappee.title() if self.__wrappee else self.__title
+
+	def __getattr__(self, name):
+		if not self.__wrappee:
+			# fetch wrappee
+			br = newBrowser(self.__url)
+			br.select_form("watch_form")
+			url = br.submit().geturl()
+			self.__wrappee = handlers.wrap(url)
+
+		return getattr(self.__wrappee, name)
 
 
