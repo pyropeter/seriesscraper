@@ -127,7 +127,6 @@ drwho = handlers.wrap("http://www.btvguide.com/Doctor-Who")
 
 
 def starts_expanded(val):
-	return False
 	if val == drwho.title():
 		return True
 	return False
