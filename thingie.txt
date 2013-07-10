@@ -1,0 +1,21 @@
+Thingies are python objects that are used through duck-typing.
+Thingies often contain other thingies.
+
+Members:
+
+title()
+	Returns a human-readable string describing the Thingie
+
+	Examples:
+		* "Doctor Who"
+		* "Season 1"
+		* "Rose"
+
+stream()
+	This function does not exist in all thingies. It's only present on thingies
+	that are playable, like episodes or streams.
+
+	Returns a file-like object containing the video data.
+
+...
+

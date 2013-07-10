@@ -1,0 +1,27 @@
+>>> series = unnamedFunctionThatTakesAnUrlAndReturnsAnObject("http://www.btvguide.com/Doctor-Who")
+>>> series.title()
+"Doctor Who"
+>>> len(series)
+8
+>>> season = series[0]
+>>> season.title()
+"Season 1"
+>>> episode = season[0]
+>>> episode.title()
+"Rose"
+>>> episode.stream()
+<Some file-like object>
+
+
+
+>>> series.stream()
+Traceback-foo
+	blah
+		baz
+AttributeError: series has no member 'stream'
+>>> season.stream()
+Traceback-foo
+	blah
+		baz
+AttributeError: season has no member 'stream'
+
