@@ -1,22 +1,19 @@
 from foo import NotMyDepartmentException, newBrowser, Thingie
 import re, urllib, mechanize
 
+def wrap(url):
+	if not re.match(r"http://gorillavid.in/[a-z0-9]+", url):
+		raise NotMyDepartmentException()
+
+	return Stream(url)
+
 class Stream(Thingie):
-	def __init__(self, url, title=None):
-		Thingie.__init__(self, url, title)
+	def __init__(self, url):
+		Thingie.__init__(self, url, url)
 
-		# change me later
-		self._title = url
-
-	def stream(self, url):
-		if not re.match(r"http://gorillavid.in/[a-z0-9]+", url):
-			raise NotMyDepartmentException()
-
-		return urllib.urlopen(getStreamUrl(url))
-
-	def getStreamUrl(self, url):
+	def stream(self):
 		# open the first page
-		br = newBrowser(url)
+		br = newBrowser(self._url)
 
 		# push the big red button
 		br.select_form(nr=1)
@@ -24,4 +21,5 @@ class Stream(Thingie):
 
 		# now it gets ugly
 		html = br.response().read()
-		return re.search(r"file: \"([^\"]+)\"", html).group(1)
+		url = re.search(r"file: \"([^\"]+)\"", html).group(1)
+		return urllib.urlopen(url)
