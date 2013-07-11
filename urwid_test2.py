@@ -2,7 +2,7 @@ import urwid
 import os
 from random import random
 from treetools import *
-from thread_test import *
+from thread_test2 import *
 from debugger import log
 
 
