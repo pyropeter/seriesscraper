@@ -43,10 +43,20 @@ class ExampleParentNode(ParentNode):
 
 		if len(data['children']) == 0:
 			# must still load children for this node
-			childLoader.get_children(data["id"])
-
+			loader = ChildLoader(self, pipe)
+			loader.start()
 			self.get_widget().loading = True
 			self.get_widget().update_widget()
+
+#			for item in data['obj-data']:
+#				con = {"name": item.title(), "obj-data": item}
+#				if(hasattr(item, "__getitem__")):
+					# contains iterable content
+#					con["children"] = []
+#				data['children'].append(con)
+#					self.add_child(con["name"], con["children"], con["obj-data"])
+#				else:
+#					self.add_child(con["name"])
 
 		return range(len(data['children']))
 
@@ -60,13 +70,14 @@ class ExampleParentNode(ParentNode):
 			childclass = ExampleNode
 		return childclass(childdata, parent=self, key=key, depth=childdepth)
 
-	def add_child(self, name, nib, children=None):
+	def add_child(self, name, children=None, objdata=None):
 		try:
-			con = {"name": name, "id": nib}
-			if children != None:
+			con = {"name": name, "id": random()}
+			if children != None and objdata != None:
 				con["children"] = children
+				con["obj-data"] = objdata
 			self.get_value()["children"].append(con)
-
+			log("Added child: " + str(con))
 			self.new_children_loaded = True
 			self.get_widget().update_widget()
 		except KeyError:
@@ -104,8 +115,8 @@ class ExampleTreeBrowser:
 			('key', title)
 		]
 
-		self.header = urwid.AttrWrap(urwid.Text(self.header_text), 'head')
-		self.footer = urwid.AttrWrap(urwid.Text(self.footer_text), 'foot')
+		self.header = urwid.AttrWrap( urwid.Text( self.header_text ), 'head')
+		self.footer = urwid.AttrWrap( urwid.Text( self.footer_text ), 'foot')
 
 		self.view = urwid.Frame( 
 			urwid.AttrWrap( self.listbox, 'body' ), 
@@ -118,64 +129,72 @@ class ExampleTreeBrowser:
 		self.loop = urwid.MainLoop(self.view, self.palette,
 			unhandled_input=self.unhandled_input)
 		# handle threaded loading
-		childLoader.set_pipe(self.loop.watch_pipe(self.say_hello))
-		childLoader.start()
+		global pipe
+		pipe = self.loop.watch_pipe(self.say_hello)
 
 		self.loop.run()
 
 	def unhandled_input(self, k):
 		if k in ('q','Q'):
 			raise urwid.ExitMainLoop()
+		elif k in ('w', 'W'):
+			self.add_node(self.topnode, "Ich bin neu hier")
+			self.topnode.add_child("moin")
 
 	def say_hello(self, data):
 		# callback method when some children were loaded
-		log("[GUI] Received data")
-		parent_id, children_data = pickle.loads(str(data))
-		log("[GUI] Parsed data")
-
-		node = self.find_node(self.topnode, parent_id)
-		log("[GUI] Traced node")
-		for c in children_data:
-			node.add_child(c["name"], c["id"], c["children"])
-		log("[GUI] Added all children")
-
+		log("Pickle through data now!")
+		node_id, children = pickle.loads(str(data))
+		log("Pickle complete, looking for: " + str(node_id))
+		node = self.find_node(self.topnode, node_id)
+		log("Adding children to " + node.get_value()["name"])
+		for c in children:
+			node.add_child(c["name"], c["children"], c["obj-data"])
 		node.get_widget().loading = False
 		node.get_widget().update_widget()
 
 	def find_node(self, cur_node, nid):
 		data = cur_node.get_value()
-#		log("Comparing IDs: " + str(data["id"]) + " [" + data["name"] + "] vs " + str(nid))
+		log("Comparing IDs: " + str(data["id"]) + " [" + data["name"] + "] vs " + str(nid))
 		if data["id"] == nid:
-#			log("Found id: " + str(cur_node))
+			log("Found id: " + str(cur_node))
 			return cur_node
 		if len(data["children"]) > 0:
 			ns = []
-#			log("Goind to load keys")
+			log("Goind to load keys")
 			for i in cur_node.load_child_keys():
 				ns.append(cur_node.get_child_node(i))
-#			log("Keys loaded")
+			log("Keys loaded")
 			for c in ns:
 				n = self.find_node(c, nid)
 				if n != None:
 					return n
 		else:
-			log("[GUI] Wrong ID and no children -> abort")
+			log("Wrong ID and no children -> abort")
 		
+
+	def add_node(self, node, name):
+		node.get_value()["children"].append({"name": name, "id": random()})
+		node.new_children_loaded = True
+		node.get_widget().update_widget()
+
 # my pipe
 import os, pickle
 pipe = None
 
 head_title = ""
 def get_tree(obj):
-	global head_title, pipe 
+	global head_title 
 	head_title = obj.title()
-
-	res = {"name": obj.title(), "id": random(), "children": []}
-
-	loader = ChildLoader(res["id"], obj, pipe)
-#	loader.start()
-
-	return loader, res
+	res = {"name": obj.title(), "obj-data": obj, "id": random()}
+	if hasattr(obj, "__getitem__"):
+		res["children"] = []
+		for item in obj:
+			con = {"name": item.title(), "obj-data": item, "id": random()}
+			if(hasattr(item, "__getitem__")):
+				con["children"] = []
+			res["children"].append(con)
+	return res
 
 
 import handlers
@@ -185,11 +204,12 @@ if len(sys.argv) > 1:
 else:
 	drwho = handlers.wrap("http://www.btvguide.com/Doctor-Who")
 
+
 def starts_expanded(val):
 	if val == head_title:
 		return True
 	return False
 
 
-childLoader, sample = get_tree(drwho)
+sample = get_tree(drwho)
 ExampleTreeBrowser(sample, title=head_title).main()

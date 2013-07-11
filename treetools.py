@@ -185,6 +185,8 @@ class ParentWidget(TreeWidget):
     def __init__(self, node):
         self.__super.__init__(node)
         self.expanded = True
+        # test edit
+        self.loading = False
         
         self.update_widget()
     
@@ -195,6 +197,9 @@ class ParentWidget(TreeWidget):
             mark = "-"
         else:
             mark = "+"
+        if self.loading:
+            mark = "o"
+
         self._innerwidget.set_text([('dirmark', mark), " ", self.get_display_text()] )
 
     def keypress(self, size, key):
@@ -263,6 +268,9 @@ class TreeNode(object):
         self._value = value
         self._depth = depth
         self._widget = None
+
+        # test edit
+        self.new_children_loaded = False
 
     def get_widget(self, reload=False):
         """ Return the widget for this node."""
@@ -346,8 +354,11 @@ class ParentNode(TreeNode):
 
     def get_child_keys(self, reload=False):
         """Return a possibly ordered list of child keys"""
-        if self._child_keys is None or reload == True:
+				# test edit
+        if self._child_keys is None or reload == True or self.new_children_loaded:
             self._child_keys = self.load_child_keys()
+        if self.new_children_loaded:
+            self.new_children_loaded = False
         return self._child_keys
 
     def load_child_keys(self):
