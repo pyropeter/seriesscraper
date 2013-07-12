@@ -1,7 +1,10 @@
 import threading, time, os, pickle
+from threading import Lock
 from debugger import log
 from Queue import Queue
 from random import random
+
+childLock = Lock()
 
 class ChildLoader (threading.Thread):
 	def __init__(self, nib, obj, pipe=None):
@@ -22,11 +25,11 @@ class ChildLoader (threading.Thread):
 			log("[THREAD] Checking queue")
 			cur_id = self.event_loop.get()
 			log("[THREAD] Parsing " + str(cur_id))
+			children = []
 			for (nib, obj) in self.loaded_data:
 				if cur_id == nib:
 					# lets load needed children
 					log("[THREAD] Found needed data")
-					children = []
 					for item in obj:
 						new_id = random()
 
@@ -41,9 +44,14 @@ class ChildLoader (threading.Thread):
 
 						log("[THREAD] Appended data: " + str(con))
 
-				# send gui stuff
-				log("[THREAD] Writing to pipe: " + str(self.pipe))
-				os.write(self.pipe, pickle.dumps((cur_id, children)))
+			# send gui stuff
+			log("[THREAD] Writing to pipe: " + str(self.pipe))
+			os.write(self.pipe, pickle.dumps((cur_id, children)))
+
+			# lock until data is parsed
+			log("[THREAD] Locking myself up")
+			childLock.acquire()
+			log("[THREAD] Was unlocked")
 
 	def get_children(self, nib):
 		log("[THREAD] Added " + str(nib) + " to queue")

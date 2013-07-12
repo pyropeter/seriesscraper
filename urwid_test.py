@@ -4,6 +4,7 @@ from random import random
 from treetools import *
 from thread_test import *
 from debugger import log
+from threading import Lock
 
 
 class ExampleTreeWidget(TreeWidget):
@@ -136,30 +137,35 @@ class ExampleTreeBrowser:
 		node = self.find_node(self.topnode, parent_id)
 		log("[GUI] Traced node")
 		for c in children_data:
-			node.add_child(c["name"], c["id"], c["children"])
+			if "children" in c:
+				node.add_child(c["name"], c["id"], c["children"])
+			else:
+				node.add_child(c["name"], c["id"])
 		log("[GUI] Added all children")
 
 		node.get_widget().loading = False
 		node.get_widget().update_widget()
 
+		log("[GUI] Unlocking thread")
+		childLock.release()
+
 	def find_node(self, cur_node, nid):
 		data = cur_node.get_value()
-#		log("Comparing IDs: " + str(data["id"]) + " [" + data["name"] + "] vs " + str(nid))
 		if data["id"] == nid:
-#			log("Found id: " + str(cur_node))
 			return cur_node
-		if len(data["children"]) > 0:
-			ns = []
-#			log("Goind to load keys")
-			for i in cur_node.load_child_keys():
-				ns.append(cur_node.get_child_node(i))
-#			log("Keys loaded")
-			for c in ns:
-				n = self.find_node(c, nid)
-				if n != None:
-					return n
+		if "children" in data:
+			if len(data["children"]) > 0:
+				ns = []
+				for i in cur_node.load_child_keys():
+					ns.append(cur_node.get_child_node(i))
+				for c in ns:
+					n = self.find_node(c, nid)
+					if n != None:
+						return n
+			else:
+				log("[GUI] Wrong ID and no children -> abort")
 		else:
-			log("[GUI] Wrong ID and no children -> abort")
+			log("[GUI] No more children -> abort")
 		
 # my pipe
 import os, pickle
@@ -173,7 +179,7 @@ def get_tree(obj):
 	res = {"name": obj.title(), "id": random(), "children": []}
 
 	loader = ChildLoader(res["id"], obj, pipe)
-#	loader.start()
+	loader.daemon = True
 
 	return loader, res
 
