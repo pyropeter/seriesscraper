@@ -1,5 +1,5 @@
 import urwid
-import os
+import pickle, string
 from random import random
 from treetools import *
 from thread_test import *
@@ -8,6 +8,10 @@ from threading import Lock
 
 
 class ExampleTreeWidget(TreeWidget):
+	def __init__(self, node):
+		self.__super.__init__(node)
+		add_widget(self)
+
 	""" Display widget for leaf nodes """
 	def get_display_text(self):
 		return self.get_node().get_value()['name']
@@ -22,6 +26,8 @@ class ExampleParentWidget(ParentWidget):
 		self.loading = False
 
 		self.update_widget()
+
+		add_widget(self)
 
 
 	def get_display_text(self):
@@ -130,14 +136,24 @@ class ExampleTreeBrowser:
 		elif k in ('h', 'H'):
 			log("[GUI] Not implemented yet")
 		elif k in ('w', 'W'):
-			log("[GUI] Going to watch selected episode")
-			node = self.find_select(self.topnode)
-			if node:
-				childLoader.watch_episode(node.get_value()["id"])
-				node.get_widget().set_selected(False)
-				node.get_widget().update_w()
-			else:
-				log("[GUI] Try to select and not just to focus")
+			log("[GUI] Going to watch focussed episode")
+
+			node = self.find_focus()
+			log("[GUI] --> %s" % node.get_value()["name"])
+			childLoader.watch_episode(node.get_value()["id"])
+		elif k in ('d', 'D'):
+			log("[GUI] Going to download selected episode(s)")
+			sel = self.get_selection()
+			for w in sel:
+				log("[GUI] Download: %s" % str(w))
+				log("[GUI] --> %s" % w.get_node().get_value()["name"])
+
+				childLoader.download_episode(w.get_node().get_value()["id"])
+
+				w.set_selected(False)
+				w.update_w()
+			if len(sel) == 0:
+				log("[GUI] Empty selection")
 
 	def say_hello(self, data):
 		# callback method when some children were loaded
@@ -178,27 +194,42 @@ class ExampleTreeBrowser:
 #		else:
 #			log("[GUI] No more children -> abort")
 
-	def find_select(self, cur_node):
-		# stupid copy paste
-		data = cur_node.get_value()
-		if cur_node.get_widget().is_selected():
-			return cur_node
-		if "children" in data:
-			if len(data["children"]) > 0:
-				ns = []
-				for i in cur_node.load_child_keys():
-					ns.append(cur_node.get_child_node(i))
-				for c in ns:
-					n = self.find_select(c)
-					if n != None:
-						return n
-#			else:
-#				log("[GUI] Wrong ID and no children -> abort")
-#		else:
-#			log("[GUI] No more children -> abort")
-		
+#	def find_select(self, cur_node):
+#		data = cur_node.get_value()
+#		if cur_node.get_widget().is_selected():
+#			return cur_node
+#		if "children" in data:
+#			if len(data["children"]) > 0:
+#				ns = []
+#				for i in cur_node.load_child_keys():
+#					ns.append(cur_node.get_child_node(i))
+#				for c in ns:
+#					n = self.find_select(c)
+#					if n != None:
+#						return n
+
+	def get_selection(self):
+		"""Return a list of all filenames marked as selected."""
+		l = []
+		for w in _widget_cache:
+			if w.selected:
+				l.append(w)
+		return l
+
+
+	def find_focus(self):
+		return self.listbox.focus.get_node()
+
+
+# caching for easier access later on
+_widget_cache = []
+
+def add_widget(widget):
+	"""Add the widget for a given path"""
+	_widget_cache.append(widget)
+
+	
 # my pipe
-import os, pickle
 pipe = None
 
 head_title = ""

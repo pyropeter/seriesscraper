@@ -67,7 +67,18 @@ class ChildLoader (threading.Thread):
 				try:
 					obj.watch()
 					return
-				except KeyError:
-					log("[THREAD] Selection is not watchable")
-					pass
+				except AttributeError:
+					log("[THREAD] Focus is not watchable")
+					return
+		log("[THREAD] Did not find stream")
+
+	def download_episode(self, cur_id):
+		for (nib, obj) in self.loaded_data:
+			if cur_id == nib:
+				try:
+					obj.download()
+					return
+				except AttributeError:
+					log("[THREAD] Selection is not downloadable")
+					return
 		log("[THREAD] Did not find stream")

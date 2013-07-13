@@ -2,8 +2,10 @@ from foo import NotMyDepartmentException, Thingie, ThingieWithItems, newBrowser
 import re
 from bs4 import BeautifulSoup
 import urllib
+import urllib2
 import handlers
 import os
+from debugger import log
 
 def wrap(url):
 	if re.match(r"http://www.btvguide.com/[^/]+", url):
@@ -100,12 +102,33 @@ class Episode(ThingieWithItems):
 				stream_url = stream.get_stream_url()
 				break
 		os.system("mplayer -msglevel all=-1 \"%s\" 2> /dev/null" % stream_url)
-		
-#   block_size = 10
-#		while True:
-#			b = self.stream().read(block_size)
-#			if len(b) == 0: break # EOF
-#			print b
+
+	def download(self):
+		if not hasattr(self, "_items"):
+			self.fetch()
+
+		block_size = 10
+
+		log("[BTVGUIDE] Download commencing")
+
+		dw_file = open(self.title(), 'w')
+
+		for stream in self._items:
+			if hasattr(stream, 'stream'):
+				stream_url = stream.get_stream_url()
+				break
+		req = urllib2.urlopen(stream_url)
+
+		log("[BTVGUIDE] Writing %s to %s" % (stream_url, self.title()))
+
+		while True:
+			chunk = req.read(block_size)
+			if not chunk: break
+			dw_file.write(chunk)
+			dw_file.flush()
+		dw_file.close()
+
+		log("[BTVGUIDE] Finished downloading")
 
 class StreamWrapper(object):
 	def __init__(self, url, title):

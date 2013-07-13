@@ -9,5 +9,6 @@ for season in drwho:
 
 	for episode in season:
 		print "        " + episode.title()
-		print episode.watch()
+#		episode.watch()
+		episode.download()
 
