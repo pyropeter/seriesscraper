@@ -23,3 +23,7 @@ class Stream(Thingie):
 		html = br.response().read()
 		url = re.search(r"file: \"([^\"]+)\"", html).group(1)
 		return urllib.urlopen(url)
+
+	def watch(self):
+		fd = self.stream()
+		# pipe me into mplayer please!

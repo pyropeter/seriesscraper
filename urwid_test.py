@@ -92,7 +92,7 @@ class ExampleTreeBrowser:
 	
 	footer_text = [
 			('title', "Season Browser"), "    ",
-			('key', "Have fun")
+			('key', "Press [h] for help")
 		]
 
 	def __init__(self, data=None, title=None):
@@ -127,6 +127,13 @@ class ExampleTreeBrowser:
 	def unhandled_input(self, k):
 		if k in ('q','Q'):
 			raise urwid.ExitMainLoop()
+		elif k in ('h', 'H'):
+			log("[GUI] Not implemented yet")
+		elif k in ('w', 'W'):
+			log("[GUI] Going to watch selected stream")
+			node = self.find_select(self.topnode)
+			log(node)
+			childLoader.watch_stream(node.get_data()["id"])
 
 	def say_hello(self, data):
 		# callback method when some children were loaded
@@ -160,6 +167,28 @@ class ExampleTreeBrowser:
 					ns.append(cur_node.get_child_node(i))
 				for c in ns:
 					n = self.find_node(c, nid)
+					if n != None:
+						return n
+			else:
+				log("[GUI] Wrong ID and no children -> abort")
+		else:
+			log("[GUI] No more children -> abort")
+
+	def find_select(self, cur_node):
+		# stupid copy paste
+		data = cur_node.get_value()
+		log(data["name"])
+		log(cur_node.get_widget().selected)
+		log("---")
+		if cur_node.get_widget().is_selected():
+			return cur_node
+		if "children" in data:
+			if len(data["children"]) > 0:
+				ns = []
+				for i in cur_node.load_child_keys():
+					ns.append(cur_node.get_child_node(i))
+				for c in ns:
+					n = self.find_select(c)
 					if n != None:
 						return n
 			else:

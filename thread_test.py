@@ -60,3 +60,14 @@ class ChildLoader (threading.Thread):
 	def set_pipe(self, new_pipe):
 		log("[THREAD] Set pipe to " + str(new_pipe))
 		self.pipe = new_pipe
+
+	def watch_stream(self, cur_id):
+		for (nib, obj) in self.loaded_data:
+			if cur_id == nib:
+				try:
+					obj.watch()
+					return
+				except KeyError:
+					log("[GUI] Selection is not watchable")
+					pass
+		log("[THREAD] Did not find stream")
