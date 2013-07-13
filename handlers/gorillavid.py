@@ -12,6 +12,9 @@ class Stream(Thingie):
 		Thingie.__init__(self, url, url)
 
 	def stream(self):
+		return urllib.urlopen(self.get_stream_url())
+
+	def get_stream_url(self):
 		# open the first page
 		br = newBrowser(self._url)
 
@@ -21,9 +24,4 @@ class Stream(Thingie):
 
 		# now it gets ugly
 		html = br.response().read()
-		url = re.search(r"file: \"([^\"]+)\"", html).group(1)
-		return urllib.urlopen(url)
-
-	def watch(self):
-		fd = self.stream()
-		# pipe me into mplayer please!
+		return re.search(r"file: \"([^\"]+)\"", html).group(1)

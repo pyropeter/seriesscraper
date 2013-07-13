@@ -130,10 +130,14 @@ class ExampleTreeBrowser:
 		elif k in ('h', 'H'):
 			log("[GUI] Not implemented yet")
 		elif k in ('w', 'W'):
-			log("[GUI] Going to watch selected stream")
+			log("[GUI] Going to watch selected episode")
 			node = self.find_select(self.topnode)
-			log(node)
-			childLoader.watch_stream(node.get_data()["id"])
+			if node:
+				childLoader.watch_episode(node.get_value()["id"])
+				node.get_widget().set_selected(False)
+				node.get_widget().update_w()
+			else:
+				log("[GUI] Try to select and not just to focus")
 
 	def say_hello(self, data):
 		# callback method when some children were loaded
@@ -169,17 +173,14 @@ class ExampleTreeBrowser:
 					n = self.find_node(c, nid)
 					if n != None:
 						return n
-			else:
-				log("[GUI] Wrong ID and no children -> abort")
-		else:
-			log("[GUI] No more children -> abort")
+#			else:
+#				log("[GUI] Wrong ID and no children -> abort")
+#		else:
+#			log("[GUI] No more children -> abort")
 
 	def find_select(self, cur_node):
 		# stupid copy paste
 		data = cur_node.get_value()
-		log(data["name"])
-		log(cur_node.get_widget().selected)
-		log("---")
 		if cur_node.get_widget().is_selected():
 			return cur_node
 		if "children" in data:
@@ -191,10 +192,10 @@ class ExampleTreeBrowser:
 					n = self.find_select(c)
 					if n != None:
 						return n
-			else:
-				log("[GUI] Wrong ID and no children -> abort")
-		else:
-			log("[GUI] No more children -> abort")
+#			else:
+#				log("[GUI] Wrong ID and no children -> abort")
+#		else:
+#			log("[GUI] No more children -> abort")
 		
 # my pipe
 import os, pickle

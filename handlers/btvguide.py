@@ -3,6 +3,7 @@ import re
 from bs4 import BeautifulSoup
 import urllib
 import handlers
+import os
 
 def wrap(url):
 	if re.match(r"http://www.btvguide.com/[^/]+", url):
@@ -80,13 +81,31 @@ class Episode(ThingieWithItems):
 			self._items.append(StreamWrapper(url, name))
 
 	def stream(self):
-		self.fetch()
+		if not hasattr(self, "_items"):
+			self.fetch()
 
 		for stream in self._items:
 			if hasattr(stream, 'stream'):
 				return stream.stream()
 
 		raise Exception("No useable stream found")
+
+	def watch(self):
+		if not hasattr(self, "_items"):
+			self.fetch()
+
+		stream_url = ""
+		for stream in self._items:
+			if hasattr(stream, 'stream'):
+				stream_url = stream.get_stream_url()
+				break
+		os.system("mplayer -msglevel all=-1 \"%s\" 2> /dev/null" % stream_url)
+		
+#   block_size = 10
+#		while True:
+#			b = self.stream().read(block_size)
+#			if len(b) == 0: break # EOF
+#			print b
 
 class StreamWrapper(object):
 	def __init__(self, url, title):

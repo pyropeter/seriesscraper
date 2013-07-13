@@ -1,4 +1,4 @@
-import handlers
+import handlers, sys
 
 drwho = handlers.wrap("http://www.btvguide.com/Doctor-Who")
 
@@ -9,4 +9,5 @@ for season in drwho:
 
 	for episode in season:
 		print "        " + episode.title()
+		print episode.watch()
 
